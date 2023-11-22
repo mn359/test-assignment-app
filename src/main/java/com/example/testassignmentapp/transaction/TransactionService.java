@@ -18,9 +18,9 @@ public class TransactionService {
 
     public void addTransaction(TransactionDTO dto) {
         Transaction transaction = new Transaction(
-                LocalDate.parse(dto.date()),
+                dto.date(),
                 dto.description(),
-                new BigDecimal(dto.value())
+                dto.value()
         );
 
         transactionRepository.save(transaction);

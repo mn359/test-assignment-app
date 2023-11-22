@@ -1,5 +1,6 @@
 package com.example.testassignmentapp.transaction;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,7 @@ public class TransactionController {
     }
 
     @PostMapping()
-    public void addTransaction(@RequestBody TransactionDTO dto) {
+    public void addTransaction(@RequestBody @Valid TransactionDTO dto) {
         this.transactionService.addTransaction(dto);
     }
 
