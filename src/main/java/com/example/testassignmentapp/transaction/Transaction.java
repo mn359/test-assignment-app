@@ -20,7 +20,7 @@ public class Transaction {
 
     private String description;
 
-    @Column(name = "transaction_value")
+    @Column(name = "transaction_value", precision = 50, scale = 10)
     private BigDecimal value;
 
     public Transaction(Long id, LocalDate date, String description, BigDecimal value) {
