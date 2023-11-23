@@ -1,20 +1,17 @@
-package com.example.testassignmentapp.exchangerate.web;
+package com.example.testassignmentapp.cbr;
 
-import com.example.testassignmentapp.common.DateTimeUtils;
 import com.example.testassignmentapp.exchangerate.ExchangeRateDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
-import org.springframework.ws.soap.client.core.SoapActionCallback;
 //import ru.sbr.dailyinfo.wsdl.GetCursOnDateXML;
 //import ru.sbr.dailyinfo.wsdl.GetCursOnDateXMLResponse;
 
-import javax.xml.datatype.DatatypeConfigurationException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service("soap")
-public class ExchangeRateSoapService extends WebServiceGatewaySupport implements ExchangeRateWebService {
+public class CbrSoapService extends WebServiceGatewaySupport implements CbrWebService {
 
     // todo the request return 500; sending it manually works
 
@@ -42,5 +39,15 @@ public class ExchangeRateSoapService extends WebServiceGatewaySupport implements
     public List<ExchangeRateDTO> getCurrentExchangeRates() {
         //return updateExchangeRate();
         return null;
+    }
+
+    @Override
+    public void getDynamicExchangeRate(LocalDate from, LocalDate to, String internalCurrencyCode) throws JsonProcessingException {
+
+    }
+
+    @Override
+    public void getDailyCurrencies() throws JsonProcessingException {
+
     }
 }

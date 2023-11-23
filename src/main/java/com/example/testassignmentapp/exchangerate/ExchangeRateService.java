@@ -3,7 +3,7 @@ package com.example.testassignmentapp.exchangerate;
 import com.example.testassignmentapp.common.DateTimeUtils;
 import com.example.testassignmentapp.exchangerate.currency.Currency;
 import com.example.testassignmentapp.exchangerate.currency.CurrencyService;
-import com.example.testassignmentapp.exchangerate.web.ExchangeRateWebService;
+import com.example.testassignmentapp.cbr.CbrWebService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,22 +16,22 @@ import java.util.Map;
 @Service
 public class ExchangeRateService {
 
-    private final ExchangeRateWebService exchangeRateWebService;
+    private final CbrWebService cbrWebService;
     private final ExchangeRateRepository exchangeRateRepository;
 
     private final CurrencyService currencyService;
 
     @Autowired
-    public ExchangeRateService(@Qualifier("http") ExchangeRateWebService exchangeRateWebService,
+    public ExchangeRateService(@Qualifier("http") CbrWebService cbrWebService,
                                ExchangeRateRepository exchangeRateRepository,
                                CurrencyService currencyService) {
-        this.exchangeRateWebService = exchangeRateWebService;
+        this.cbrWebService = cbrWebService;
         this.exchangeRateRepository = exchangeRateRepository;
         this.currencyService = currencyService;
     }
 
     public void updateExchangeRate() throws JsonProcessingException {
-        List<ExchangeRateDTO> data = exchangeRateWebService.getCurrentExchangeRates();
+        List<ExchangeRateDTO> data = cbrWebService.getCurrentExchangeRates();
 
         Map<String, Currency> currencyByCode = currencyService.getAllCurrenciesByCode();
 
