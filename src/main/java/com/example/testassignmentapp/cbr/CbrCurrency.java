@@ -1,6 +1,6 @@
 package com.example.testassignmentapp.cbr;
 
 public record CbrCurrency(
-    String internalCbrCode,
-    String code
+    String code,
+    String internalCbrCode
 ) { }

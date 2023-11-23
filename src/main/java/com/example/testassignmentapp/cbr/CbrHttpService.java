@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,6 +23,7 @@ import java.util.List;
 
 @Service("http")
 public class CbrHttpService implements CbrWebService {
+    private static Logger logger = LoggerFactory.getLogger(CbrHttpService.class);
 
     private final WebClient webClient;
 
@@ -114,6 +117,8 @@ public class CbrHttpService implements CbrWebService {
     ***/
     @Override
     public List<CbrCurrency> getDailyCurrencies()  {
+        logger.info("Receiving daily currencies from cbr.ru");
+
         String soapActionName = "EnumValutesXML";
 
         var resXmlString = sendRequest(
@@ -136,8 +141,8 @@ public class CbrHttpService implements CbrWebService {
         for (JsonNode jsonNode : nodeArray) {
             if (jsonNode.has("Vcode") && jsonNode.has("VcharCode")) {
                 res.add(new CbrCurrency(
-                        jsonNode.get("Vcode").asText().strip(),
-                        jsonNode.get("VcharCode").asText().strip()
+                        jsonNode.get("VcharCode").asText().strip(),
+                        jsonNode.get("Vcode").asText().strip()
                 ));
             }
         }
