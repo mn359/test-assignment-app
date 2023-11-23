@@ -33,16 +33,16 @@ public class ExchangeRateService {
         this.currencyService = currencyService;
     }
 
-    public void updateExchangeRate() throws JsonProcessingException {
-        Map<String, Currency> codeToCurrencyMap = currencyService
+    public void updateExchangeRate()  {
+        Map<String, Currency> codeToCurrencyToSave = currencyService
                 .findCurrenciesByCodes("EUR", "USD")
                 .stream().collect(Collectors.toMap(Currency::getCode, o -> o));
 
         List<ExchangeRateDTO> data = cbrWebService.getCurrentExchangeRates();
 
         var exchangeRates = data.stream()
-                .filter(dto -> codeToCurrencyMap.containsKey(dto.currency()))
-                .map(dto -> this.createExchangeRate(codeToCurrencyMap.get(dto.currency()), dto))
+                .filter(dto -> codeToCurrencyToSave.containsKey(dto.currency()))
+                .map(dto -> this.createExchangeRate(codeToCurrencyToSave.get(dto.currency()), dto))
                 .toList();
 
         exchangeRateRepository.saveAll(exchangeRates);
