@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface CbrWebService {
-    List<ExchangeRateDTO> getCurrentExchangeRates() throws JsonProcessingException;
+    List<ExchangeRateDTO> getCurrentExchangeRates();
 
     List<ExchangeRateDTO> getExchangeRatesForCurrencyInPeriod(LocalDate from,
                                                               LocalDate to,

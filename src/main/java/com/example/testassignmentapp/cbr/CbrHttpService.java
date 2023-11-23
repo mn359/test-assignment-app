@@ -5,6 +5,7 @@ import com.example.testassignmentapp.exchangerate.ExchangeRateDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,11 +32,11 @@ public class CbrHttpService implements CbrWebService {
     }
 
     @Override
-    public List<ExchangeRateDTO> getCurrentExchangeRates() throws JsonProcessingException {
+    public List<ExchangeRateDTO> getCurrentExchangeRates() {
         return getExchangeRate(DateTimeUtils.today());
     }
 
-    public List<ExchangeRateDTO> getExchangeRate(LocalDate date) throws JsonProcessingException {
+    public List<ExchangeRateDTO> getExchangeRate(LocalDate date) {
         String soapActionName = "GetCursOnDateXML";
 
         var xmlString = sendRequest(
@@ -44,7 +44,12 @@ public class CbrHttpService implements CbrWebService {
                 "http://web.cbr.ru/" + soapActionName);
 
         var mapper =  new XmlMapper();
-        var nodeTree =  mapper.readTree(xmlString);
+        JsonNode nodeTree = null;
+        try {
+            nodeTree = mapper.readTree(xmlString);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeJsonMappingException("Error while mapping exchangeRateData");
+        }
 
         List<ExchangeRateDTO> res = new ArrayList<>();
 
