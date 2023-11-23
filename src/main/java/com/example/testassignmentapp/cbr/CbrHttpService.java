@@ -74,7 +74,7 @@ public class CbrHttpService implements CbrWebService {
     public List<ExchangeRateDTO> getExchangeRatesForCurrencyInPeriod(LocalDate from,
                                                                      LocalDate to,
                                                                      String currencyCode,
-                                                                     String internalCbrCurrencyCode) throws JsonProcessingException {
+                                                                     String internalCbrCurrencyCode)  {
         String soapActionName = "GetCursDynamicXML";
 
         var xmlString = sendRequest(
@@ -82,7 +82,12 @@ public class CbrHttpService implements CbrWebService {
                 "http://web.cbr.ru/" + soapActionName
         );
         var mapper = new XmlMapper();
-        var nodeTree = mapper.readTree(xmlString);
+        JsonNode nodeTree = null;
+        try {
+            nodeTree = mapper.readTree(xmlString);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeJsonMappingException("Error while mapping exchange rates data");
+        }
 
         var arr = getArrayNode(mapper, nodeTree, soapActionName);
 
@@ -108,7 +113,7 @@ public class CbrHttpService implements CbrWebService {
         "VcharCode" -> {TextNode@13301} ""AUD""
     ***/
     @Override
-    public List<CbrCurrency> getDailyCurrencies() throws JsonProcessingException {
+    public List<CbrCurrency> getDailyCurrencies()  {
         String soapActionName = "EnumValutesXML";
 
         var resXmlString = sendRequest(
@@ -116,7 +121,13 @@ public class CbrHttpService implements CbrWebService {
                 "http://web.cbr.ru/" + soapActionName
         );
         var mapper = new XmlMapper();
-        var resNodeTree =  mapper.readTree(resXmlString);
+
+        JsonNode resNodeTree = null;
+        try {
+            resNodeTree = mapper.readTree(resXmlString);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeJsonMappingException("Error while mapping currency data");
+        }
 
         List<CbrCurrency> res = new ArrayList<>();
 

@@ -12,7 +12,7 @@ public interface CbrWebService {
     List<ExchangeRateDTO> getExchangeRatesForCurrencyInPeriod(LocalDate from,
                                                               LocalDate to,
                                                               String currencyCode,
-                                                              String internalCbrCurrencyCode) throws JsonProcessingException;
+                                                              String internalCbrCurrencyCode) ;
 
-    List<CbrCurrency> getDailyCurrencies() throws JsonProcessingException;
+    List<CbrCurrency> getDailyCurrencies() ;
 }
