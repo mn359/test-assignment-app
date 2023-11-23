@@ -42,12 +42,12 @@ public class CbrSoapService extends WebServiceGatewaySupport implements CbrWebSe
     }
 
     @Override
-    public void getDynamicExchangeRate(LocalDate from, LocalDate to, String internalCurrencyCode) throws JsonProcessingException {
-
+    public List<ExchangeRateDTO> getExchangeRatesForCurrencyInPeriod(LocalDate from, LocalDate to, String currencyCode, String internalCurrencyCode) throws JsonProcessingException {
+        return null;
     }
 
     @Override
-    public void getDailyCurrencies() throws JsonProcessingException {
-
+    public List<CbrCurrency> getDailyCurrencies() throws JsonProcessingException {
+        return null;
     }
 }

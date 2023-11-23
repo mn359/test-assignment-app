@@ -8,6 +8,11 @@ import java.util.List;
 
 public interface CbrWebService {
     List<ExchangeRateDTO> getCurrentExchangeRates() throws JsonProcessingException;
-    void getDynamicExchangeRate(LocalDate from, LocalDate to, String internalCurrencyCode) throws JsonProcessingException;
-    void getDailyCurrencies() throws JsonProcessingException;
+
+    List<ExchangeRateDTO> getExchangeRatesForCurrencyInPeriod(LocalDate from,
+                                                              LocalDate to,
+                                                              String currencyCode,
+                                                              String internalCbrCurrencyCode) throws JsonProcessingException;
+
+    List<CbrCurrency> getDailyCurrencies() throws JsonProcessingException;
 }

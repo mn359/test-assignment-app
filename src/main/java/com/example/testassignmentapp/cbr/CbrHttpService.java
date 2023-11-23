@@ -4,6 +4,7 @@ import com.example.testassignmentapp.common.DateTimeUtils;
 import com.example.testassignmentapp.exchangerate.ExchangeRateDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,79 +43,104 @@ public class CbrHttpService implements CbrWebService {
                 getExchangeRateOnDateRequestBody(date),
                 "http://web.cbr.ru/" + soapActionName);
 
-        var nodeTree =  new XmlMapper().readTree(xmlString);
+        var mapper =  new XmlMapper();
+        var nodeTree =  mapper.readTree(xmlString);
 
         List<ExchangeRateDTO> res = new ArrayList<>();
 
-        getArrayNode(nodeTree, soapActionName).forEach(o -> res.add(
+        getArrayNode(mapper, nodeTree, soapActionName).forEach(o -> res.add(
                     new ExchangeRateDTO(
-                            o.get("VchCode").asText(),
-                            o.get("VunitRate").asText()
+                            o.get("VchCode").asText().strip(),
+                            o.get("VunitRate").asText().strip(),
+                            date.atStartOfDay()
                     )
         ));
 
         return res;
     }
 
+    /*** "CursDate" -> {TextNode@13227} ""2023-11-18T00:00:00+03:00""
+         "Vcode" -> {TextNode@13229} ""R01235""
+         "Vnom" -> {TextNode@13231} ""1""
+         "Vcurs" -> {TextNode@13233} ""89.1237""
+         "VunitRate" -> {TextNode@13235} ""89.1237""
+     ***/
     @Override
-    public void getDynamicExchangeRate(LocalDate from, LocalDate to, String internalCurrencyCode) throws JsonProcessingException {
+    public List<ExchangeRateDTO> getExchangeRatesForCurrencyInPeriod(LocalDate from,
+                                                                     LocalDate to,
+                                                                     String currencyCode,
+                                                                     String internalCbrCurrencyCode) throws JsonProcessingException {
         String soapActionName = "GetCursDynamicXML";
 
         var xmlString = sendRequest(
-                getDynamicExchangeRateRequestBody(from, to, internalCurrencyCode),
+                getDynamicExchangeRateRequestBody(from, to, internalCbrCurrencyCode),
                 "http://web.cbr.ru/" + soapActionName
         );
-        var nodeTree = new XmlMapper().readTree(xmlString);
+        var mapper = new XmlMapper();
+        var nodeTree = mapper.readTree(xmlString);
 
-        var arr = getArrayNode(nodeTree, soapActionName) ;
-
-        /*
-        * "CursDate" -> {TextNode@13227} ""2023-11-18T00:00:00+03:00""
-            "Vcode" -> {TextNode@13229} ""R01235""
-            "Vnom" -> {TextNode@13231} ""1""
-            "Vcurs" -> {TextNode@13233} ""89.1237""
-            "VunitRate" -> {TextNode@13235} ""89.1237""*/
+        var arr = getArrayNode(mapper, nodeTree, soapActionName);
 
         List<ExchangeRateDTO> res = new ArrayList<>();
+        arr.forEach(
+                o -> res.add(new ExchangeRateDTO(
+                        currencyCode,
+                        o.get("VunitRate").asText().strip(),
+                        OffsetDateTime.parse(o.get("CursDate").asText().strip()).toLocalDateTime()
+                ))
+        );
+
+        return res;
     }
 
+    /***
+        "Vcode" -> {TextNode@13289} ""R01010              ""
+        "Vname" -> {TextNode@13291} ""Австралийский доллар                                                                                                                                                                                                                                          ""
+        "VEngname" -> {TextNode@13293} ""Australian Dollar                                                                                                                                                                                                                                             ""
+        "Vnom" -> {TextNode@13295} ""1""
+        "VcommonCode" -> {TextNode@13297} ""R01010    ""
+        "VnumCode" -> {TextNode@13299} ""36""
+        "VcharCode" -> {TextNode@13301} ""AUD""
+    ***/
     @Override
-    public void getDailyCurrencies() throws JsonProcessingException {
+    public List<CbrCurrency> getDailyCurrencies() throws JsonProcessingException {
         String soapActionName = "EnumValutesXML";
 
-        var xmlString = sendRequest(
+        var resXmlString = sendRequest(
                 getDailyCurrenciesRequestBody(),
                 "http://web.cbr.ru/" + soapActionName
         );
-        var nodeTree =  new XmlMapper().readTree(xmlString);
+        var mapper = new XmlMapper();
+        var resNodeTree =  mapper.readTree(resXmlString);
 
-        var nodeArray = getArrayNode(nodeTree, soapActionName);
+        List<CbrCurrency> res = new ArrayList<>();
 
-        /*
-        *   "Vcode" -> {TextNode@13289} ""R01010              ""
-            "Vname" -> {TextNode@13291} ""Австралийский доллар                                                                                                                                                                                                                                          ""
-            "VEngname" -> {TextNode@13293} ""Australian Dollar                                                                                                                                                                                                                                             ""
-            "Vnom" -> {TextNode@13295} ""1""
-            "VcommonCode" -> {TextNode@13297} ""R01010    ""
-            "VnumCode" -> {TextNode@13299} ""36""
-            "VcharCode" -> {TextNode@13301} ""AUD""
-        *
-        * */
+        var nodeArray = getArrayNode(mapper, resNodeTree, soapActionName);
 
-        List<ExchangeRateDTO> res = new ArrayList<>();
+        for (JsonNode jsonNode : nodeArray) {
+            if (jsonNode.has("Vcode") && jsonNode.has("VcharCode")) {
+                res.add(new CbrCurrency(
+                        jsonNode.get("Vcode").asText().strip(),
+                        jsonNode.get("VcharCode").asText().strip()
+                ));
+            }
+        }
+        return res;
     }
 
-    public ArrayNode getArrayNode(JsonNode nodeTree, String soapActionName) {
-        return (ArrayNode) nodeTree.get("Body")
+    public ArrayNode getArrayNode(ObjectMapper mapper, JsonNode nodeTree, String soapActionName) {
+        var res = nodeTree.get("Body")
                 .get(soapActionName + "Response")
                 .get(soapActionName + "Result")
                 .get("ValuteData")
                 .get(soapActionName.contains("Valute")
                         ? soapActionName.replaceAll("Get|XML","")
                         : "Valute" + soapActionName.replaceAll("Get|XML",""));
+        if (!ArrayNode.class.isInstance(res)) {
+            return mapper.createArrayNode().add(res);
+        }
+        return (ArrayNode) res;
     }
-
-
 
     public String sendRequest(String xmlBody, String soapAction) {
         return this.webClient

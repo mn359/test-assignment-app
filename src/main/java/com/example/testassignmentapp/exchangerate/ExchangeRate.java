@@ -28,8 +28,12 @@ public class ExchangeRate {
     @Column(precision = 50, scale = 10)
     private BigDecimal rate;
 
+    public ExchangeRate(){
+
+    }
+
     public ExchangeRate(Currency currency, LocalDateTime datetime, BigDecimal rate) {
-        this(null, currency, datetime, rate);
+        this(null, currency,  datetime, rate);
     }
 
     public ExchangeRate(Long id, Currency currency, LocalDateTime datetime, BigDecimal rate) {
@@ -37,5 +41,9 @@ public class ExchangeRate {
         this.currency = currency;
         this.datetime = datetime;
         this.rate = rate;
+    }
+
+    public LocalDateTime getDatetime() {
+        return datetime;
     }
 }

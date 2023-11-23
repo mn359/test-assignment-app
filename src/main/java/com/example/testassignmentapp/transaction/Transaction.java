@@ -33,6 +33,9 @@ public class Transaction {
         this(null, date, description, value);
     }
 
+    public Transaction() {
+    }
+
     public Long getId() {
         return id;
     }

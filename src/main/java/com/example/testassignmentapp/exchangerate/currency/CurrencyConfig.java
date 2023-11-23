@@ -11,13 +11,14 @@ import java.util.stream.Collectors;
 @Configuration
 public class CurrencyConfig {
     @Bean
-    CommandLineRunner commandLineRunner(CurrencyRepository repository) {
+    CommandLineRunner commandLineRunner(CurrencyService service) {
         return args -> {
-            Set<String> expectedCurrencyCodes =
-                    Arrays.stream(Currency.CurrencyEnum.values()).map(Enum::name).collect(Collectors.toSet());
+            //         Set<String> expectedCurrencyCodes = Set.of("EUR", "USD");
+//            repository.saveAll(expectedCurrencyCodes.stream()
+//                    .map(code -> new Currency(code))
+//                    .toList());
 
-            repository.saveAll(expectedCurrencyCodes.stream()
-                    .map(code -> new Currency(Currency.CurrencyEnum.valueOf(code))).toList());
+            service.getCurrenciesFromCbrAndSave();
         };
     }
 }

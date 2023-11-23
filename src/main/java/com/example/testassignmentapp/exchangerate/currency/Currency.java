@@ -9,25 +9,28 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Currency {
-    enum CurrencyEnum {
-        EUR, USD;
-    }
-
     @Id
     @GeneratedValue
     private int id;
 
-    @Enumerated(EnumType.STRING)
     @Column(unique=true)
-    private CurrencyEnum code;
+    private String code;
 
-    public Currency(CurrencyEnum code) {
+    @Column(unique=true)
+    private String internalCbrCode;
+
+    public Currency(String code, String internalCbrCode) {
         this.code = code;
+        this.internalCbrCode = internalCbrCode;
     }
 
     public Currency() {}
 
-    public CurrencyEnum getCode() {
+    public String getCode() {
         return code;
+    }
+
+    public String getInternalCbrCode() {
+        return internalCbrCode;
     }
 }

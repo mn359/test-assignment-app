@@ -1,5 +1,6 @@
 package com.example.testassignmentapp.transaction;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,7 @@ public class TransactionController {
     }
 
     @GetMapping
-    public void getTransactions(@RequestBody TransactionReportRequest request) {
-
+    public void getTransactions(@RequestBody @Valid TransactionReportRequest request) throws JsonProcessingException {
+        this.transactionService.getTransactions(request);
     }
 }
