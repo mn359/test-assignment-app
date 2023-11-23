@@ -43,7 +43,19 @@ public class ExchangeRate {
         this.rate = rate;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
     public LocalDateTime getDatetime() {
         return datetime;
+    }
+
+    public BigDecimal getRate() {
+        return rate;
     }
 }

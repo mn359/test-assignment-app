@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -41,7 +42,7 @@ public class TransactionService {
         transactionRepository.save(transaction);
     }
 
-    public void getTransactions(TransactionReportRequest request) throws JsonProcessingException {
+    public List<TransactionDTO> getTransactionsInPeriodInCurrency(TransactionReportRequest request) throws JsonProcessingException {
         Currency currency = currencyRepository.findByCode(request.currency());
 
         if (currency == null) {
@@ -56,6 +57,7 @@ public class TransactionService {
 
         var transactionToRate= mapTransactionToRate(transactionsInPeriod, exchangeRatesForCurrencyInPeriod);
 
+        return calculateTransactionsForRates(transactionToRate);
     }
 
     Map<Transaction, ExchangeRate> mapTransactionToRate(List<Transaction> transactions,
@@ -85,11 +87,25 @@ public class TransactionService {
         return transactionToRate;
     }
 
-    void calculateTransactionsForRates(Map<Transaction, ExchangeRate> map) {
-
+    List<TransactionDTO> calculateTransactionsForRates(Map<Transaction, ExchangeRate> map) {
+        return map.entrySet()
+                .stream()
+                .map(e -> calculateTransactionInCurrency(e.getKey(), e.getValue()))
+                .toList();
     }
 
-    void calculateTransactionInCurrency(Transaction transaction, ExchangeRate exchangeRate) {
+    TransactionDTO calculateTransactionInCurrency(Transaction transactionInRoubles, ExchangeRate exchangeRateForCurrency) {
 
+        var trValueInRoubles= transactionInRoubles.getValue();
+        var exchangeRateInRoubles = exchangeRateForCurrency.getRate();
+
+        var trValueInCurrency = trValueInRoubles.divide(exchangeRateInRoubles, RoundingMode.HALF_UP)
+                .stripTrailingZeros();
+
+        return new TransactionDTO(
+                transactionInRoubles.getDate(),
+                transactionInRoubles.getDescription(),
+                trValueInCurrency
+        );
     }
 }
