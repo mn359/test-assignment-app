@@ -20,7 +20,6 @@ public class ScheduledTask {
         this.exchangeRateService = exchangeRateService;
     }
 
-
     @Scheduled(cron = "${scheduled-task-first-cron}")
     public void executeFirstTime() {
         logger.info("Executing task first");

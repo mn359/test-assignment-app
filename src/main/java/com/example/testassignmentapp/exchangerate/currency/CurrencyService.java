@@ -26,18 +26,7 @@ public class CurrencyService {
         this.cbrWebService = cbrWebService;
     }
 
-    public Map<String, Currency> getAllCurrenciesByCode() {
-        return currencyRepository.findAll().stream().collect(Collectors.toMap(
-                o -> o.getCode(),
-                o->o
-        ));
-    }
-
-    public Currency getCurrencyByCode(String code) {
-        return currencyRepository.findByCode(code);
-    }
-
-    public List<Currency> getCurrenciesFromCbrAndSave() throws JsonProcessingException {
+    public List<Currency> getCurrenciesFromCbrAndSave()  {
         var data = cbrWebService.getDailyCurrencies();
 
         List<Currency> currencies = data
@@ -53,6 +42,17 @@ public class CurrencyService {
         currencyRepository.saveAll(currencies);
 
         return currencies;
+    }
+
+    public Map<String, Currency> getAllCurrenciesByCode() {
+        return currencyRepository.findAll().stream().collect(Collectors.toMap(
+                o -> o.getCode(),
+                o->o
+        ));
+    }
+
+    public Currency getCurrencyByCode(String code) {
+        return currencyRepository.findByCode(code);
     }
 
     public List<Currency> findCurrenciesByCodes(String... codes) {
