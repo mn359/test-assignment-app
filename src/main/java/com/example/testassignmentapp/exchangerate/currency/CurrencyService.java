@@ -26,7 +26,7 @@ public class CurrencyService {
         this.cbrWebService = cbrWebService;
     }
 
-    public List<Currency> getCurrenciesFromCbrAndSave()  {
+    public List<Currency> getCurrenciesFromCbr()  {
         var data = cbrWebService.getDailyCurrencies();
 
         List<Currency> currencies = data
@@ -39,6 +39,11 @@ public class CurrencyService {
                 .stream()
                 .map(cbrc -> new Currency(cbrc.code(), cbrc.internalCbrCode()))
                 .toList();
+        return currencies;
+    }
+
+    public List<Currency> getCurrenciesFromCbrAndSave()  {
+        List<Currency> currencies = getCurrenciesFromCbr();
         currencyRepository.saveAll(currencies);
 
         return currencies;

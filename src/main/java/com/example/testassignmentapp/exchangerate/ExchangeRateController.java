@@ -20,7 +20,7 @@ public class ExchangeRateController {
     }
 
     @PostMapping("update")
-    public void updateExchangeRate() throws DatatypeConfigurationException, JsonProcessingException {
+    public void updateExchangeRate() {
         this.exchangeRateService.updateExchangeRate();
     }
 }
