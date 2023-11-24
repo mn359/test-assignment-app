@@ -26,12 +26,14 @@ public class CbrHttpService implements CbrWebService {
     private static Logger logger = LoggerFactory.getLogger(CbrHttpService.class);
 
     private final WebClient webClient;
+    private final CbrXmlParser cbrXmlParser;
 
     @Autowired
-    public CbrHttpService(WebClient.Builder webClientBuilder) {
+    public CbrHttpService(WebClient.Builder webClientBuilder, CbrXmlParser cbrXmlParser) {
         this.webClient = webClientBuilder
                 .baseUrl("http://www.cbr.ru/")
                 .build();
+        this.cbrXmlParser = cbrXmlParser;
     }
 
     @Override
@@ -42,27 +44,12 @@ public class CbrHttpService implements CbrWebService {
     public List<ExchangeRateDTO> getExchangeRate(LocalDate date) {
         String soapActionName = "GetCursOnDateXML";
 
-        var xmlString = sendRequest(
+        String resXmlString = sendRequest(
                 getExchangeRateOnDateRequestBody(date),
                 "http://web.cbr.ru/" + soapActionName);
 
-        var mapper =  new XmlMapper();
-        JsonNode nodeTree = null;
-        try {
-            nodeTree = mapper.readTree(xmlString);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeJsonMappingException("Error while mapping exchangeRateData");
-        }
-
-        List<ExchangeRateDTO> res = new ArrayList<>();
-
-        getArrayNode(mapper, nodeTree, soapActionName).forEach(o -> res.add(
-                    new ExchangeRateDTO(
-                            o.get("VchCode").asText().strip(),
-                            o.get("VunitRate").asText().strip(),
-                            date.atStartOfDay()
-                    )
-        ));
+        var res = cbrXmlParser
+                .parseExchangeRateXml(resXmlString, soapActionName, date);
 
         return res;
     }
@@ -84,24 +71,9 @@ public class CbrHttpService implements CbrWebService {
                 getDynamicExchangeRateRequestBody(from, to, internalCbrCurrencyCode),
                 "http://web.cbr.ru/" + soapActionName
         );
-        var mapper = new XmlMapper();
-        JsonNode nodeTree = null;
-        try {
-            nodeTree = mapper.readTree(xmlString);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeJsonMappingException("Error while mapping exchange rates data");
-        }
 
-        var arr = getArrayNode(mapper, nodeTree, soapActionName);
-
-        List<ExchangeRateDTO> res = new ArrayList<>();
-        arr.forEach(
-                o -> res.add(new ExchangeRateDTO(
-                        currencyCode,
-                        o.get("VunitRate").asText().strip(),
-                        OffsetDateTime.parse(o.get("CursDate").asText().strip()).toLocalDateTime()
-                ))
-        );
+        var res = cbrXmlParser
+                .parseExchangeRateInPeriod(xmlString, soapActionName, currencyCode);
 
         return res;
     }
@@ -121,46 +93,13 @@ public class CbrHttpService implements CbrWebService {
 
         String soapActionName = "EnumValutesXML";
 
-        var resXmlString = sendRequest(
+        String resXml = sendRequest(
                 getDailyCurrenciesRequestBody(),
                 "http://web.cbr.ru/" + soapActionName
         );
-        var mapper = new XmlMapper();
 
-        JsonNode resNodeTree = null;
-        try {
-            resNodeTree = mapper.readTree(resXmlString);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeJsonMappingException("Error while mapping currency data");
-        }
-
-        List<CbrCurrency> res = new ArrayList<>();
-
-        var nodeArray = getArrayNode(mapper, resNodeTree, soapActionName);
-
-        for (JsonNode jsonNode : nodeArray) {
-            if (jsonNode.has("Vcode") && jsonNode.has("VcharCode")) {
-                res.add(new CbrCurrency(
-                        jsonNode.get("VcharCode").asText().strip(),
-                        jsonNode.get("Vcode").asText().strip()
-                ));
-            }
-        }
+        var res= cbrXmlParser.parseDailyCurrencies(resXml, soapActionName);
         return res;
-    }
-
-    public ArrayNode getArrayNode(ObjectMapper mapper, JsonNode nodeTree, String soapActionName) {
-        var res = nodeTree.get("Body")
-                .get(soapActionName + "Response")
-                .get(soapActionName + "Result")
-                .get("ValuteData")
-                .get(soapActionName.contains("Valute")
-                        ? soapActionName.replaceAll("Get|XML","")
-                        : "Valute" + soapActionName.replaceAll("Get|XML",""));
-        if (!ArrayNode.class.isInstance(res)) {
-            return mapper.createArrayNode().add(res);
-        }
-        return (ArrayNode) res;
     }
 
     public String sendRequest(String xmlBody, String soapAction) {
