@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -42,7 +43,7 @@ public class TransactionService {
         transactionRepository.save(transaction);
     }
 
-    public List<TransactionDTO> getTransactionsInPeriodInCurrency(TransactionReportRequest request) throws JsonProcessingException {
+    public List<TransactionDTO> getTransactionsInPeriodInCurrency(TransactionReportRequest request) {
         Currency currency = currencyRepository.findByCode(request.currency());
 
         if (currency == null) {
@@ -91,13 +92,21 @@ public class TransactionService {
         return map.entrySet()
                 .stream()
                 .map(e -> calculateTransactionInCurrency(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(TransactionDTO::date))
                 .toList();
     }
 
     TransactionDTO calculateTransactionInCurrency(Transaction transactionInRoubles, ExchangeRate exchangeRateForCurrency) {
 
         var trValueInRoubles= transactionInRoubles.getValue();
+        if (trValueInRoubles.scale() < 8) {
+            trValueInRoubles = trValueInRoubles.setScale(8);
+        }
+
         var exchangeRateInRoubles = exchangeRateForCurrency.getRate();
+        if (exchangeRateInRoubles.precision() < 8) {
+            exchangeRateInRoubles = exchangeRateInRoubles.setScale(8);
+        }
 
         var trValueInCurrency = trValueInRoubles.divide(exchangeRateInRoubles, RoundingMode.HALF_UP)
                 .stripTrailingZeros();

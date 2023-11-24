@@ -28,7 +28,7 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<TransactionDTO> getTransactions(@RequestBody @Valid TransactionReportRequest request) throws JsonProcessingException {
+    public List<TransactionDTO> getTransactions(@RequestBody @Valid TransactionReportRequest request) {
         return this.transactionService.getTransactionsInPeriodInCurrency(request);
     }
 }
