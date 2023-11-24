@@ -7,11 +7,11 @@
 
 Запустить тесты:
 
-`./mvnw clean test`
+`.\mvnw clean test`
 
 Запустить приложение:
 
-`./mvnw spring-boot:run`
+`.\mvnw spring-boot:run`
 
 ## Тестирование вручную
 
