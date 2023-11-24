@@ -9,9 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 public class ExchangeRate {
@@ -57,5 +59,25 @@ public class ExchangeRate {
 
     public BigDecimal getRate() {
         return rate;
+    }
+
+    public int hashCode() {
+        return Objects.hash(id, currency, datetime, rate);
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ExchangeRate that = (ExchangeRate) o;
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .append(currency, that.currency)
+                .append(datetime, that.datetime)
+                .append(rate, that.rate)
+                .isEquals();
     }
 }

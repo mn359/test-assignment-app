@@ -48,7 +48,7 @@ public class ExchangeRateService {
         exchangeRateRepository.saveAll(exchangeRates);
     }
 
-    public List<ExchangeRate> getExchangeRatesForCurrencyInPeriod(LocalDate from, LocalDate to, Currency currency) throws JsonProcessingException {
+    public List<ExchangeRate> getExchangeRatesForCurrencyInPeriod(LocalDate from, LocalDate to, Currency currency) {
         return cbrWebService
                 .getExchangeRatesForCurrencyInPeriod(
                         from,
@@ -78,7 +78,7 @@ public class ExchangeRateService {
         if (currency == null) {
             throw new EntityNotFoundException("Currency not found for code: " + dto.currency());
         }
-        ExchangeRate exchangeRate = new ExchangeRate(currency,dto.dateTime(), new BigDecimal(dto.rate()));
+        ExchangeRate exchangeRate = createExchangeRate(currency, dto);
         return exchangeRate;
     }
 }
