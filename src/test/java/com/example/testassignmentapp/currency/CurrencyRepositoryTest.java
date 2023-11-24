@@ -3,7 +3,7 @@ package com.example.testassignmentapp.currency;
 
 import com.example.testassignmentapp.exchangerate.currency.Currency;
 import com.example.testassignmentapp.exchangerate.currency.CurrencyRepository;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
