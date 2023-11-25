@@ -2,9 +2,6 @@ package com.example.testassignmentapp.currency;
 
 import com.example.testassignmentapp.cbr.CbrCurrency;
 import com.example.testassignmentapp.cbr.CbrWebService;
-import com.example.testassignmentapp.exchangerate.currency.Currency;
-import com.example.testassignmentapp.exchangerate.currency.CurrencyRepository;
-import com.example.testassignmentapp.exchangerate.currency.CurrencyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

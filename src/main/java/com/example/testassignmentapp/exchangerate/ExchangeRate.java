@@ -1,6 +1,6 @@
 package com.example.testassignmentapp.exchangerate;
 
-import com.example.testassignmentapp.exchangerate.currency.Currency;
+import com.example.testassignmentapp.currency.Currency;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

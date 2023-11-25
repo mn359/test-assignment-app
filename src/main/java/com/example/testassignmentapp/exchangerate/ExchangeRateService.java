@@ -1,9 +1,8 @@
 package com.example.testassignmentapp.exchangerate;
 
-import com.example.testassignmentapp.exchangerate.currency.Currency;
-import com.example.testassignmentapp.exchangerate.currency.CurrencyService;
+import com.example.testassignmentapp.currency.Currency;
+import com.example.testassignmentapp.currency.CurrencyService;
 import com.example.testassignmentapp.cbr.CbrWebService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,7 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

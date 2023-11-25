@@ -2,9 +2,8 @@ package com.example.testassignmentapp.transaction;
 
 import com.example.testassignmentapp.exchangerate.ExchangeRate;
 import com.example.testassignmentapp.exchangerate.ExchangeRateService;
-import com.example.testassignmentapp.exchangerate.currency.Currency;
-import com.example.testassignmentapp.exchangerate.currency.CurrencyRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.testassignmentapp.currency.Currency;
+import com.example.testassignmentapp.currency.CurrencyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

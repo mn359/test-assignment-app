@@ -1,8 +1,7 @@
-package com.example.testassignmentapp.exchangerate.currency;
+package com.example.testassignmentapp.currency;
 
 import com.example.testassignmentapp.cbr.CbrCurrency;
 import com.example.testassignmentapp.cbr.CbrWebService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;

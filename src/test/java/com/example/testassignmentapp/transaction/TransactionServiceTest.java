@@ -2,8 +2,8 @@ package com.example.testassignmentapp.transaction;
 
 import com.example.testassignmentapp.exchangerate.ExchangeRate;
 import com.example.testassignmentapp.exchangerate.ExchangeRateService;
-import com.example.testassignmentapp.exchangerate.currency.Currency;
-import com.example.testassignmentapp.exchangerate.currency.CurrencyRepository;
+import com.example.testassignmentapp.currency.Currency;
+import com.example.testassignmentapp.currency.CurrencyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;

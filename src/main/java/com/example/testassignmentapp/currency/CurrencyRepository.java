@@ -1,4 +1,4 @@
-package com.example.testassignmentapp.exchangerate.currency;
+package com.example.testassignmentapp.currency;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
