@@ -54,7 +54,7 @@ public class CbrXmlParserTest {
         expectedRes.add(new ExchangeRateDTO("AZN", "51.8356", date.atStartOfDay()));
 
         CbrXmlParser cbrXmlParser = new CbrXmlParser();
-        List<ExchangeRateDTO> actualRes = cbrXmlParser.parseExchangeRateXml(resXml, soapActionName, date);
+        List<ExchangeRateDTO> actualRes = cbrXmlParser.parseExchangeRateXml(resXml, soapActionName, date.atStartOfDay());
 
         Assertions.assertEquals(expectedRes.size(), actualRes.size());
         for (int i = 0; i < expectedRes.size(); i++) {

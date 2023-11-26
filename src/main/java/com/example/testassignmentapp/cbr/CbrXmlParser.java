@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
 public class CbrXmlParser {
     public List<ExchangeRateDTO> parseExchangeRateXml(String resXml,
                                                       String soapActionName,
-                                                      LocalDate date) {
+                                                      LocalDateTime datetime) {
 
         var mapper =  new XmlMapper();
         JsonNode nodeTree = readTree(mapper, resXml);
@@ -29,7 +30,7 @@ public class CbrXmlParser {
                 new ExchangeRateDTO(
                         o.get("VchCode").asText().strip(),
                         o.get("VunitRate").asText().strip(),
-                        date.atStartOfDay()
+                        datetime
                 )
         ));
         return res;

@@ -16,9 +16,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service("http")
@@ -38,18 +37,18 @@ public class CbrHttpService implements CbrWebService {
 
     @Override
     public List<ExchangeRateDTO> getCurrentExchangeRates() {
-        return getExchangeRate(DateTimeUtils.today());
+        return getExchangeRate(DateTimeUtils.now());
     }
 
-    public List<ExchangeRateDTO> getExchangeRate(LocalDate date) {
+    public List<ExchangeRateDTO> getExchangeRate(LocalDateTime datetime) {
         String soapActionName = "GetCursOnDateXML";
 
         String resXmlString = sendRequest(
-                getExchangeRateOnDateRequestBody(date),
+                getExchangeRateOnDateRequestBody(datetime.toLocalDate()),
                 "http://web.cbr.ru/" + soapActionName);
 
         var res = cbrXmlParser
-                .parseExchangeRateXml(resXmlString, soapActionName, date);
+                .parseExchangeRateXml(resXmlString, soapActionName, datetime);
 
         return res;
     }
