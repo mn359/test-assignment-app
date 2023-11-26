@@ -47,6 +47,11 @@ public class ExchangeRateService {
     }
 
     public List<ExchangeRate> getExchangeRatesForCurrencyInPeriod(LocalDate from, LocalDate to, Currency currency) {
+        return exchangeRateRepository.
+                findByDatetimeBetweenAndCurrency(from.atStartOfDay(), to.atStartOfDay(), currency);
+    }
+
+    public List<ExchangeRate> getExchangeRatesForCurrencyInPeriodFromCbr(LocalDate from, LocalDate to, Currency currency) {
         return cbrWebService
                 .getExchangeRatesForCurrencyInPeriod(
                         from,

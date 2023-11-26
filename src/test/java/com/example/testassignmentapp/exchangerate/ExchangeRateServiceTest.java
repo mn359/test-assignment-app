@@ -84,7 +84,7 @@ class ExchangeRateServiceTest {
                 new ExchangeRate(currency, LocalDate.of(2022, 1, 2).atStartOfDay(), new BigDecimal("1.4"))
         );
 
-        List<ExchangeRate> actualExchangeRates = exchangeRateService.getExchangeRatesForCurrencyInPeriod(from, to, currency);
+        List<ExchangeRate> actualExchangeRates = exchangeRateService.getExchangeRatesForCurrencyInPeriodFromCbr(from, to, currency);
 
         assertThat(expectedExchangeRates).isEqualTo(actualExchangeRates);
     }

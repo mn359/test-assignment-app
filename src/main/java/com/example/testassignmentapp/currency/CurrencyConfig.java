@@ -5,19 +5,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.util.stream.Stream;
 
 @Configuration
 public class CurrencyConfig {
     @Bean
     @Profile("!test")
-    CommandLineRunner commandLineRunner(CurrencyService service) {
+    CommandLineRunner commandLineRunner(CurrencyRepository repository) {
         return args -> {
-            //         Set<String> expectedCurrencyCodes = Set.of("EUR", "USD");
-//            repository.saveAll(expectedCurrencyCodes.stream()
-//                    .map(code -> new Currency(code))
-//                    .toList());
+            repository.saveAll(Stream.of("EUR", "USD")
+                    .map(code -> new Currency(code, code))
+                    .toList());
 
-            service.getCurrenciesFromCbrAndSave();
+            //service.getCurrenciesFromCbrAndSave();
         };
     }
 }
