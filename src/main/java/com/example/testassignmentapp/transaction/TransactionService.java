@@ -53,7 +53,7 @@ public class TransactionService {
                 .getExchangeRatesForCurrencyInPeriod(request.from(), request.to(), currency);
 
         List<Transaction> transactionsInPeriod = transactionRepository
-                .findByDateBetween(request.from(), request.to());
+                .findByDateBetweenOrderByDateAsc(request.from(), request.to());
 
         var transactionToRate= mapTransactionToRate(transactionsInPeriod, exchangeRatesForCurrencyInPeriod);
 
@@ -62,6 +62,10 @@ public class TransactionService {
 
     Map<Transaction, ExchangeRate> mapTransactionToRate(List<Transaction> transactions,
                                                         List<ExchangeRate> rates) {
+
+        transactions = transactions.stream().sorted(Comparator.comparing(Transaction::getDate)).toList();
+        rates = rates.stream().sorted(Comparator.comparing(ExchangeRate::getDatetime)).toList();
+
         Map<Transaction, ExchangeRate> transactionToRate = new HashMap<>();
 
         ListIterator<ExchangeRate> rateIterator = rates.listIterator();
@@ -69,14 +73,14 @@ public class TransactionService {
         ExchangeRate rate = null;
         for (Transaction transaction : transactions) {
             while(rateIterator.hasNext()) {
-                var cur = rateIterator.next();
-                if (cur.getDatetime().isAfter(transaction.getDate().atStartOfDay())) {
+                var currentlyProcessedRate = rateIterator.next();
+                if (currentlyProcessedRate.getDatetime().isAfter(transaction.getDate().atStartOfDay())) {
                     if (rateIterator.hasPrevious()) {
                         rateIterator.previous();
                     }
                     break;
                 } else {
-                    rate = cur;
+                    rate = currentlyProcessedRate;
                 }
             }
             if (rate == null) {

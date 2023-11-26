@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByDateBetween(LocalDate from, LocalDate to);
+    List<Transaction> findByDateBetweenOrderByDateAsc(LocalDate from, LocalDate to);
 }

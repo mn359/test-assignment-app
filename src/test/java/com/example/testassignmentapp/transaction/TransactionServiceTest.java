@@ -68,7 +68,7 @@ class TransactionServiceTest {
 
         when(currencyRepository.findByCode(request.currency())).thenReturn(currency);
         when(exchangeRateService.getExchangeRatesForCurrencyInPeriod(request.from(), request.to(), currency)).thenReturn(exchangeRates);
-        when(transactionRepository.findByDateBetween(request.from(), request.to())).thenReturn(transactions);
+        when(transactionRepository.findByDateBetweenOrderByDateAsc(request.from(), request.to())).thenReturn(transactions);
 
         List<TransactionDTO> transactionDTOs = transactionService.getTransactionsInPeriodInCurrency(request);
 
