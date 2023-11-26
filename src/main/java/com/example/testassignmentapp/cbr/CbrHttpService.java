@@ -2,12 +2,6 @@ package com.example.testassignmentapp.cbr;
 
 import com.example.testassignmentapp.common.DateTimeUtils;
 import com.example.testassignmentapp.exchangerate.ExchangeRateDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +31,10 @@ public class CbrHttpService implements CbrWebService {
 
     @Override
     public List<ExchangeRateDTO> getCurrentExchangeRates() {
-        return getExchangeRate(DateTimeUtils.now());
+        return getExchangeRatesOnDate(DateTimeUtils.now());
     }
 
-    public List<ExchangeRateDTO> getExchangeRate(LocalDateTime datetime) {
+    public List<ExchangeRateDTO> getExchangeRatesOnDate(LocalDateTime datetime) {
         String soapActionName = "GetCursOnDateXML";
 
         String resXmlString = sendRequest(

@@ -58,9 +58,9 @@ class ExchangeRateServiceTest {
         );
 
         when(currencyService.findCurrenciesByCodes("EUR", "USD")).thenReturn(currencies);
-        when(cbrWebService.getCurrentExchangeRates()).thenReturn(data);
+        when(cbrWebService.getExchangeRatesOnDate(localDateTime)).thenReturn(data);
 
-        exchangeRateService.updateExchangeRate();
+        exchangeRateService.updateExchangeRate(localDateTime);
 
         verify(exchangeRateRepository, times(1)).saveAll(expectedExchangeRates);
     }

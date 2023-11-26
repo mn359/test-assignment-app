@@ -1,5 +1,6 @@
 package com.example.testassignmentapp.exchangerate;
 
+import com.example.testassignmentapp.common.DateTimeUtils;
 import com.example.testassignmentapp.currency.Currency;
 import com.example.testassignmentapp.currency.CurrencyService;
 import com.example.testassignmentapp.cbr.CbrWebService;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,11 +34,19 @@ public class ExchangeRateService {
     }
 
     public void updateExchangeRate()  {
+        updateExchangeRate(DateTimeUtils.now());
+    }
+
+    public void updateExchangeRate(LocalDate date) {
+        updateExchangeRate(date.atStartOfDay());
+    }
+
+    public void updateExchangeRate(LocalDateTime datetime)  {
         Map<String, Currency> codeToCurrencyToSave = currencyService
                 .findCurrenciesByCodes("EUR", "USD")
                 .stream().collect(Collectors.toMap(Currency::getCode, o -> o));
 
-        List<ExchangeRateDTO> data = cbrWebService.getCurrentExchangeRates();
+        List<ExchangeRateDTO> data = cbrWebService.getExchangeRatesOnDate(datetime);
 
         var exchangeRates = data.stream()
                 .filter(dto -> codeToCurrencyToSave.containsKey(dto.currency()))

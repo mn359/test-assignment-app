@@ -8,6 +8,7 @@ import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 //import ru.sbr.dailyinfo.wsdl.GetCursOnDateXMLResponse;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service("soap")
@@ -38,6 +39,11 @@ public class CbrSoapService extends WebServiceGatewaySupport implements CbrWebSe
     @Override
     public List<ExchangeRateDTO> getCurrentExchangeRates() {
         //return updateExchangeRate();
+        return null;
+    }
+
+    @Override
+    public List<ExchangeRateDTO> getExchangeRatesOnDate(LocalDateTime datetime) {
         return null;
     }
 
