@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 
 @Service
@@ -55,7 +57,10 @@ public class TransactionService {
         List<Transaction> transactionsInPeriod = transactionRepository
                 .findByDateBetweenOrderByDateAsc(request.from(), request.to());
 
-        var transactionToRate= mapTransactionToRate(transactionsInPeriod, exchangeRatesForCurrencyInPeriod);
+        var transactionToRate= mapTransactionToRate(
+                transactionsInPeriod,
+                exchangeRatesForCurrencyInPeriod
+        );
 
         return calculateTransactionsForRates(transactionToRate);
     }
@@ -70,25 +75,60 @@ public class TransactionService {
 
         ListIterator<ExchangeRate> rateIterator = rates.listIterator();
 
-        ExchangeRate rate = null;
+        ExchangeRate rate;
         for (Transaction transaction : transactions) {
-            while(rateIterator.hasNext()) {
-                var currentlyProcessedRate = rateIterator.next();
-                if (currentlyProcessedRate.getDatetime().isAfter(transaction.getDate().atStartOfDay())) {
-                    if (rateIterator.hasPrevious()) {
-                        rateIterator.previous();
-                    }
-                    break;
-                } else {
-                    rate = currentlyProcessedRate;
-                }
-            }
-            if (rate == null) {
-                throw new IllegalArgumentException("ExchangeRate not found for date " + transaction.getDate());
-            }
+            rate = findExchangeRateForTransaction(rateIterator, transaction).orElseThrow(
+                    () -> new  IllegalArgumentException("ExchangeRate not found for date " + transaction.getDate())
+            );
             transactionToRate.put(transaction, rate);
         }
+        
         return transactionToRate;
+    }
+
+    private Optional<ExchangeRate> findExchangeRateForTransaction(ListIterator<ExchangeRate> rateIterator,
+                                                                  Transaction transaction) {
+        while(rateIterator.hasNext()) {
+
+            Optional<ExchangeRate> applicableProcessedRate = getExchangeRateApplicableForTransaction(
+                    rateIterator, transaction
+            );
+            if (applicableProcessedRate.isPresent()) {
+                return applicableProcessedRate;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<ExchangeRate> getExchangeRateApplicableForTransaction(ListIterator<ExchangeRate> rateIterator,
+                                                                           Transaction transaction) {
+
+        var currentlyProcessedRate = rateIterator.next();
+
+        if (isRateApplicableForTransaction(currentlyProcessedRate, transaction)) {
+            setPreviousIteratorValueForUnmappedRate(rateIterator);
+            return Optional.of(currentlyProcessedRate);
+        }
+        return Optional.empty();
+    }
+
+    private boolean isRateApplicableForTransaction(ExchangeRate rate, Transaction transaction) {
+        return !rate.getDatetime().isAfter(transaction.getDate().atStartOfDay());
+    }
+
+//    private Optional<ExchangeRate> findExchangeRateForTransactionNew(ListIterator<ExchangeRate> rateIterator,
+//                                                                  Transaction transaction) {
+//        return Stream.iterate(rateIterator, ListIterator::hasNext, ListIterator::next)
+//                .filter(rate -> isRateApplicableForTransaction(rate.next(), transaction))
+//                .peek(this::setPreviousIteratorValueForUnmappedRate)
+//                .findFirst();
+//    }
+
+    private void setPreviousIteratorValueForUnmappedRate(ListIterator<ExchangeRate> rateIterator) {
+
+        if (rateIterator.hasPrevious()) {
+            rateIterator.previous();
+        }
     }
 
     List<TransactionDTO> calculateTransactionsForRates(Map<Transaction, ExchangeRate> map) {
