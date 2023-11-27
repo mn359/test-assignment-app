@@ -87,22 +87,9 @@ class TransactionServiceTest {
     void testMapTransactionToRate() {
         Currency currency = new Currency("USD", "USD");
 
-        List<Transaction> transactions = Arrays.asList(
-                new Transaction(LocalDate.of(2023, 3, 10), "test", BigDecimal.valueOf(300)),
-                new Transaction(LocalDate.of(2023, 3, 11), "test", BigDecimal.valueOf(300)),
-                new Transaction(LocalDate.of(2023, 3, 12), "test", BigDecimal.valueOf(300))
-        );
+        List<Transaction> transactions = createTransactions(10, 11, 12);
 
-        List<ExchangeRate> rates = Arrays.asList(
-                new ExchangeRate(
-                        currency,
-                        LocalDate.of(2023, 3, 10).atStartOfDay(),
-                        BigDecimal.valueOf(80)),
-                new ExchangeRate(
-                        currency,
-                        LocalDate.of(2023, 3, 12).atStartOfDay(),
-                        BigDecimal.valueOf(82))
-        );
+        List<ExchangeRate> rates = createRates(currency, 10, 12);
 
         Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
 
@@ -149,5 +136,22 @@ class TransactionServiceTest {
 
         BigDecimal expectedValueInCurrency = BigDecimal.valueOf(13.75);
         assertThat(result.value()).isEqualByComparingTo(expectedValueInCurrency);
+    }
+
+    List<Transaction> createTransactions(int... days) {
+        return Arrays.stream(days)
+                .mapToObj(i -> new Transaction(
+                        LocalDate.of(2023, 3, i), "test", BigDecimal.valueOf(300)
+                )).toList();
+    }
+
+    List<ExchangeRate> createRates(Currency currency, int... days) {
+        return Arrays.stream(days)
+                .mapToObj(i ->
+                        new ExchangeRate(
+                                currency,
+                                LocalDate.of(2023, 3, i).atStartOfDay(),
+                                BigDecimal.valueOf(80))
+                ).toList();
     }
 }
