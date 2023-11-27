@@ -67,68 +67,8 @@ public class TransactionService {
 
     Map<Transaction, ExchangeRate> mapTransactionToRate(List<Transaction> transactions,
                                                         List<ExchangeRate> rates) {
-
-        transactions = transactions.stream().sorted(Comparator.comparing(Transaction::getDate)).toList();
-        rates = rates.stream().sorted(Comparator.comparing(ExchangeRate::getDatetime)).toList();
-
-        Map<Transaction, ExchangeRate> transactionToRate = new HashMap<>();
-
-        ListIterator<ExchangeRate> rateIterator = rates.listIterator();
-
-        ExchangeRate rate;
-        for (Transaction transaction : transactions) {
-            rate = findExchangeRateForTransaction(rateIterator, transaction).orElseThrow(
-                    () -> new  IllegalArgumentException("ExchangeRate not found for date " + transaction.getDate())
-            );
-            transactionToRate.put(transaction, rate);
-        }
-        
-        return transactionToRate;
-    }
-
-    private Optional<ExchangeRate> findExchangeRateForTransaction(ListIterator<ExchangeRate> rateIterator,
-                                                                  Transaction transaction) {
-        while(rateIterator.hasNext()) {
-
-            Optional<ExchangeRate> applicableProcessedRate = getExchangeRateApplicableForTransaction(
-                    rateIterator, transaction
-            );
-            if (applicableProcessedRate.isPresent()) {
-                return applicableProcessedRate;
-            }
-        }
-        return Optional.empty();
-    }
-
-    private Optional<ExchangeRate> getExchangeRateApplicableForTransaction(ListIterator<ExchangeRate> rateIterator,
-                                                                           Transaction transaction) {
-
-        var currentlyProcessedRate = rateIterator.next();
-
-        if (isRateApplicableForTransaction(currentlyProcessedRate, transaction)) {
-            setPreviousIteratorValueForUnmappedRate(rateIterator);
-            return Optional.of(currentlyProcessedRate);
-        }
-        return Optional.empty();
-    }
-
-    private boolean isRateApplicableForTransaction(ExchangeRate rate, Transaction transaction) {
-        return !rate.getDatetime().isAfter(transaction.getDate().atStartOfDay());
-    }
-
-//    private Optional<ExchangeRate> findExchangeRateForTransactionNew(ListIterator<ExchangeRate> rateIterator,
-//                                                                  Transaction transaction) {
-//        return Stream.iterate(rateIterator, ListIterator::hasNext, ListIterator::next)
-//                .filter(rate -> isRateApplicableForTransaction(rate.next(), transaction))
-//                .peek(this::setPreviousIteratorValueForUnmappedRate)
-//                .findFirst();
-//    }
-
-    private void setPreviousIteratorValueForUnmappedRate(ListIterator<ExchangeRate> rateIterator) {
-
-        if (rateIterator.hasPrevious()) {
-            rateIterator.previous();
-        }
+        return new TransactionToRateMapper(transactions, rates)
+                .mapTransactionToRate();
     }
 
     List<TransactionDTO> calculateTransactionsForRates(Map<Transaction, ExchangeRate> map) {
