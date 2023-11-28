@@ -58,10 +58,10 @@ class TransactionServiceTest {
         );
         List<Transaction> transactions = createTransactions(100, 2023, 2, 10,11,12);
 
-        Map<Transaction, ExchangeRate> transactionToRate = new HashMap<>();
-        transactionToRate.put(transactions.get(0), exchangeRates.get(0));
-        transactionToRate.put(transactions.get(1), exchangeRates.get(0));
-        transactionToRate.put(transactions.get(2), exchangeRates.get(1));
+//        Map<Transaction, ExchangeRate> transactionToRate = new HashMap<>();
+//        transactionToRate.put(transactions.get(0), exchangeRates.get(0));
+//        transactionToRate.put(transactions.get(1), exchangeRates.get(0));
+//        transactionToRate.put(transactions.get(2), exchangeRates.get(1));
 
         when(currencyRepository.findByCode(request.currency())).thenReturn(currency);
         when(exchangeRateService.getExchangeRatesForCurrencyInPeriod(request.from(), request.to(), currency)).thenReturn(exchangeRates);
@@ -89,7 +89,8 @@ class TransactionServiceTest {
         Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
 
         assertThat(result).hasSize(transactions.size());
-        var sortedEntries = result.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
+        var sortedEntries = result.entrySet().stream()
+                .sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
 
         assertThat(sortedEntries.get(0).getKey().getDate())
                 .isEqualTo(LocalDate.of(2023, 3, 10));
@@ -105,6 +106,108 @@ class TransactionServiceTest {
                 .isEqualTo(LocalDate.of(2023, 3, 12));
         assertThat(sortedEntries.get(2).getValue().getDatetime())
                 .isEqualTo(LocalDate.of(2023, 3, 12).atStartOfDay());
+    }
+
+    @Test
+    void testMapTransactionToRate2() {
+        Currency currency = new Currency("USD", "USD");
+
+        List<Transaction> transactions = createTransactions(300, 2023, 3,10, 11, 12);
+        List<ExchangeRate> rates = createRates(currency,80, 2023, 3,   9);
+
+        Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
+
+        assertThat(result).hasSize(transactions.size());
+        var sortedEntries = result.entrySet().stream()
+                .sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
+
+        assertThat(sortedEntries.get(0).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 9).atStartOfDay());
+
+        assertThat(sortedEntries.get(1).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 9).atStartOfDay());
+
+        assertThat(sortedEntries.get(2).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 9).atStartOfDay());
+    }
+
+    @Test
+    void testMapTransactionToRate3() {
+        Currency currency = new Currency("USD", "USD");
+
+        List<Transaction> transactions = createTransactions(300, 2023, 3,10, 11, 12);
+        List<ExchangeRate> rates = createRates(currency,80, 2023, 3,   6, 7, 9,  11, 14, 15);
+
+        Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
+
+        assertThat(result).hasSize(transactions.size());
+        var sortedEntries = result.entrySet().stream()
+                .sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
+
+        assertThat(sortedEntries.get(0).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 9).atStartOfDay());
+
+        assertThat(sortedEntries.get(1).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 11).atStartOfDay());
+
+        assertThat(sortedEntries.get(2).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 11).atStartOfDay());
+    }
+
+    @Test
+    void testMapTransactionToRate4() {
+        Currency currency = new Currency("USD", "USD");
+
+        List<Transaction> transactions = createTransactions(300, 2023, 3,
+                10, 13, 15);
+        List<ExchangeRate> rates = createRates(currency,80, 2023, 3,
+                6, 7, 9, 11, 14, 17);
+
+        Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
+
+        assertThat(result).hasSize(transactions.size());
+        var sortedEntries = result.entrySet().stream()
+                .sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
+
+        assertThat(sortedEntries.get(0).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 9).atStartOfDay());
+
+        assertThat(sortedEntries.get(1).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 11).atStartOfDay());
+
+        assertThat(sortedEntries.get(2).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 14).atStartOfDay());
+    }
+
+    @Test
+    void testMapTransactionToRate5() {
+        Currency currency = new Currency("USD", "USD");
+
+        List<Transaction> transactions = createTransactions(300, 2023, 3,
+                10, 11, 13, 14, 16);
+        List<ExchangeRate> rates = createRates(currency,80, 2023, 3,
+                6, 7, 9, 11, 14, 18, 20);
+
+        Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
+
+        assertThat(result).hasSize(transactions.size());
+        var sortedEntries = result.entrySet().stream()
+                .sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
+
+        assertThat(sortedEntries.get(0).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 9).atStartOfDay());
+
+        assertThat(sortedEntries.get(1).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 11).atStartOfDay());
+
+        assertThat(sortedEntries.get(2).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 11).atStartOfDay());
+
+        assertThat(sortedEntries.get(3).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 14).atStartOfDay());
+
+        assertThat(sortedEntries.get(3).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 14).atStartOfDay());
     }
 
     @Test
