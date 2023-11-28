@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +56,7 @@ class TransactionServiceTest {
                         LocalDate.of(2023, 2, 12).atStartOfDay(),
                         BigDecimal.valueOf(82))
         );
-        List<Transaction> transactions = Arrays.asList(
-            new Transaction(LocalDate.of(2023, 2, 10), "test", BigDecimal.valueOf(100)),
-            new Transaction(LocalDate.of(2023, 2, 11), "test", BigDecimal.valueOf(100)),
-            new Transaction(LocalDate.of(2023, 2, 12), "test", BigDecimal.valueOf(100))
-        );
+        List<Transaction> transactions = createTransactions(100, 2023, 2, 10,11,12);
 
         Map<Transaction, ExchangeRate> transactionToRate = new HashMap<>();
         transactionToRate.put(transactions.get(0), exchangeRates.get(0));
@@ -82,40 +79,41 @@ class TransactionServiceTest {
 
     }
 
-
     @Test
     void testMapTransactionToRate() {
         Currency currency = new Currency("USD", "USD");
 
-        List<Transaction> transactions = createTransactions(10, 11, 12);
-
-        List<ExchangeRate> rates = createRates(currency, 10, 12);
+        List<Transaction> transactions = createTransactions(300, 2023, 3,10, 11, 12);
+        List<ExchangeRate> rates = createRates(currency,80, 2023, 3,   10, 12);
 
         Map<Transaction, ExchangeRate> result = transactionService.mapTransactionToRate(transactions, rates);
 
         assertThat(result).hasSize(transactions.size());
-        for (Map.Entry<Transaction, ExchangeRate> entry : result.entrySet()) {
-            Transaction transaction = entry.getKey();
-            ExchangeRate rate = entry.getValue();
+        var sortedEntries = result.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().getDate())).toList();
 
-            assertThat(rate.getDatetime()).isBeforeOrEqualTo(transaction.getDate().atStartOfDay());
-        }
+        assertThat(sortedEntries.get(0).getKey().getDate())
+                .isEqualTo(LocalDate.of(2023, 3, 10));
+        assertThat(sortedEntries.get(0).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 10).atStartOfDay());
+
+        assertThat(sortedEntries.get(1).getKey().getDate())
+                .isEqualTo(LocalDate.of(2023, 3, 11));
+        assertThat(sortedEntries.get(1).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 10).atStartOfDay());
+
+        assertThat(sortedEntries.get(2).getKey().getDate())
+                .isEqualTo(LocalDate.of(2023, 3, 12));
+        assertThat(sortedEntries.get(2).getValue().getDatetime())
+                .isEqualTo(LocalDate.of(2023, 3, 12).atStartOfDay());
     }
 
     @Test
     void testMapTransactionToRateWithInvalidInput() {
         Currency currency = new Currency("USD", "USD");
 
-        List<Transaction> transactions = Arrays.asList(
-                new Transaction(LocalDate.of(2022, 3, 10), "test", BigDecimal.valueOf(300))
-        );
+        List<Transaction> transactions =  createTransactions(300, 2022, 3, 10);
+        List<ExchangeRate> rates = createRates(currency, 80, 2023, 3, 10);
 
-        List<ExchangeRate> rates = Arrays.asList(
-                new ExchangeRate(
-                        currency,
-                        LocalDate.of(2023, 3, 10).atStartOfDay(),
-                        BigDecimal.valueOf(80))
-        );
         assertThrows(IllegalArgumentException.class, () -> transactionService.mapTransactionToRate(transactions, rates));
     }
 
@@ -138,20 +136,20 @@ class TransactionServiceTest {
         assertThat(result.value()).isEqualByComparingTo(expectedValueInCurrency);
     }
 
-    List<Transaction> createTransactions(int... days) {
+    List<Transaction> createTransactions(int value, int year, int month, int... days) {
         return Arrays.stream(days)
                 .mapToObj(i -> new Transaction(
-                        LocalDate.of(2023, 3, i), "test", BigDecimal.valueOf(300)
+                        LocalDate.of(year, month, i), "test", BigDecimal.valueOf(value)
                 )).toList();
     }
 
-    List<ExchangeRate> createRates(Currency currency, int... days) {
+    List<ExchangeRate> createRates(Currency currency, int value, int year, int month, int... days) {
         return Arrays.stream(days)
                 .mapToObj(i ->
                         new ExchangeRate(
                                 currency,
-                                LocalDate.of(2023, 3, i).atStartOfDay(),
-                                BigDecimal.valueOf(80))
+                                LocalDate.of(year, month, i).atStartOfDay(),
+                                BigDecimal.valueOf(value))
                 ).toList();
     }
 }
